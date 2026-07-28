@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "symbol": "AETUSDT",
+    "direction": "LONG",
+    "score": 2,
+    "reasons": [
+      "RSI تشبع بيعي (16)"
+    ],
+    "entry": 2.235,
+    "stop_loss": 2.1902999999999997,
+    "target": 2.3244,
+    "opened_at": "2026-07-28T23:37:44.037426+00:00"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "direction": "SHORT",
+    "score": 2,
+    "reasons": [
+      "RSI تشبع شرائي (72)"
+    ],
+    "entry": 0.1614,
+    "stop_loss": 0.164628,
+    "target": 0.15494399999999997,
+    "opened_at": "2026-07-28T23:37:44.611830+00:00"
+  },
+  {
+    "symbol": "BEATUSDT",
+    "direction": "SHORT",
+    "score": 2,
+    "reasons": [
+      "RSI تشبع شرائي (81)"
+    ],
+    "entry": 3.43092,
+    "stop_loss": 3.4995384,
+    "target": 3.2936832,
+    "opened_at": "2026-07-28T23:37:44.878535+00:00"
+  }
+]
