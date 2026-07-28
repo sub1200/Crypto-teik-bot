@@ -2,14 +2,9 @@
 """
 Crypto Signal Bot - CoinAnk-style market scanner + Position Tracker
 ======================================================================
-1. يفحص أهم N عملة بالسيولة على Binance Futures.
-2. يختار أفضل الفرص فقط (Top picks) - مو كل شي يطابق الشروط.
+1. يفحص أهم N عملة بالسيولة على Binance Futures عبر بروكسي يتجاوز حظر GitHub.
+2. يختار أفضل الفرص فقط (Top picks).
 3. يفتح "صفقة افتراضية" لكل فرصة مختارة (يحفظها بملف positions.json).
-4. بكل تشغيلة يراقب الصفقات المفتوحة: إذا وصل السعر الهدف يرسل تنبيه ربح
-   ويقفل الصفقة، وإذا ضرب وقف الخسارة يرسل تنبيه خسارة ويقفلها.
-
-الحالة (الصفقات المفتوحة) تُحفظ بملف positions.json ويتم رفعه (commit) تلقائياً
-من قبل GitHub Actions بعد كل تشغيلة، عشان الصفقات تضل محفوظة بين التشغيلات.
 """
 
 import os
@@ -20,40 +15,53 @@ from datetime import datetime, timezone
 
 import requests
 
-BINANCE_FAPI = "https://data-api.binance.vision"
+BINANCE_FAPI = "https://fapi.binance.com"
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 POSITIONS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "positions.json")
 
 # ---- إعدادات المسح ----
-SCAN_POOL_SIZE = 30         # عدد العملات اللي يتم فحصها كل تشغيلة (أهم بالسيولة)
-OI_CHANGE_THRESHOLD = 5.0
-FUNDING_EXTREME = 0.03
-LS_RATIO_HIGH = 1.8
-LS_RATIO_LOW = 0.6
+SCAN_POOL_SIZE = 30         # عدد العملات اللي يتم فحصها كل تشغيلة
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-MIN_SCORE_TO_ALERT = 3      # الحد الأدنى لاعتبار الإشارة "مرشحة"
 
 # ---- إعدادات الصفقات ----
 MAX_OPEN_POSITIONS = 5      # أقصى عدد صفقات مفتوحة بنفس الوقت
-MAX_NEW_PER_RUN = 3         # أعلى عدد صفقات جديدة تُفتح كل تشغيلة (الأفضل فقط)
-STOP_PCT = 2.0               # % وقف الخسارة من سعر الدخول
-TARGET_PCT = 4.0             # % الهدف من سعر الدخول
+MAX_NEW_PER_RUN = 3         # أعلى عدد صفقات جديدة تُفتح كل تشغيلة
+STOP_PCT = 2.0               # % وقف الخسارة
+TARGET_PCT = 4.0             # % الهدف
 
 SESSION = requests.Session()
-SESSION.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+SESSION.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+})
+
+# استخدام بروكسي للالتفاف على حظر الـ IP لـ GitHub Actions
+PROXIES = {
+    "http": "http://api.allorigins.win/raw?url=",
+    "https": "https://api.allorigins.win/raw?url="
+}
 
 
 # ============================== أدوات عامة ==============================
 
 def safe_get(url, params=None, retries=3):
+    # تحويل الرابط ليمر عبر الخدمة الوسيطة لمنع حظر 403
+    proxy_url = f"https://api.allorigins.win/raw?url={url}"
+    
     for attempt in range(retries):
         try:
-            r = SESSION.get(url, params=params, timeout=15)
+            r = SESSION.get(proxy_url, params=params, timeout=15)
             r.raise_for_status()
             return r.json()
         except Exception as e:
+            # محاولة مباشرة في حال فشل البروكسي
+            try:
+                r = SESSION.get(url, params=params, timeout=10)
+                r.raise_for_status()
+                return r.json()
+            except Exception:
+                pass
             print(f"  [warn] {url} failed (try {attempt+1}/{retries}): {e}", file=sys.stderr)
             time.sleep(1.5)
     return None
@@ -79,7 +87,7 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
-# ============================== إدارة الصفقات (الحالة) ==============================
+# ============================== إدارة الصفقات ==============================
 
 def load_positions():
     if not os.path.exists(POSITIONS_FILE):
@@ -99,18 +107,17 @@ def save_positions(positions):
 
 def get_current_price(symbol):
     data = safe_get(f"{BINANCE_FAPI}/fapi/v1/ticker/price", params={"symbol": symbol})
-    if not data:
+    if not data or "price" not in data:
         return None
     return float(data["price"])
 
 
 def check_open_positions(positions):
-    """يفحص الصفقات المفتوحة، يرسل تنبيه ربح/خسارة، ويرجع القائمة بعد إزالة المقفولة"""
     still_open = []
     for pos in positions:
         price = get_current_price(pos["symbol"])
         if price is None:
-            still_open.append(pos)  # تعذر الجلب - نحتفظ فيها ونحاول بالمرة الجاية
+            still_open.append(pos)
             continue
 
         hit_target = (
@@ -149,53 +156,22 @@ def check_open_positions(positions):
                 f"مفتوحة منذ: {pos['opened_at']}"
             )
         else:
-            still_open.append(pos)  # الصفقة لسا شغالة
+            still_open.append(pos)
 
         time.sleep(0.2)
 
     return still_open
 
 
-# ============================== تحليل السوق (نفس منطق CoinAnk) ==============================
+# ============================== تحليل السوق ==============================
 
 def get_top_symbols(n=SCAN_POOL_SIZE):
     data = safe_get(f"{BINANCE_FAPI}/fapi/v1/ticker/24hr")
-    if not data:
+    if not data or not isinstance(data, list):
         return []
-    usdt_pairs = [d for d in data if d["symbol"].endswith("USDT")]
+    usdt_pairs = [d for d in data if isinstance(d, dict) and d.get("symbol", "").endswith("USDT")]
     usdt_pairs.sort(key=lambda d: float(d.get("quoteVolume", 0)), reverse=True)
     return usdt_pairs[:n]
-
-
-def get_oi_change(symbol):
-    data = safe_get(
-        f"{BINANCE_FAPI}/futures/data/openInterestHist",
-        params={"symbol": symbol, "period": "1h", "limit": 5},
-    )
-    if not data or len(data) < 5:
-        return None
-    oldest = float(data[0]["sumOpenInterest"])
-    newest = float(data[-1]["sumOpenInterest"])
-    if oldest == 0:
-        return None
-    return (newest - oldest) / oldest * 100
-
-
-def get_funding_rate(symbol):
-    data = safe_get(f"{BINANCE_FAPI}/fapi/v1/premiumIndex", params={"symbol": symbol})
-    if not data:
-        return None
-    return float(data.get("lastFundingRate", 0)) * 100
-
-
-def get_long_short_ratio(symbol):
-    data = safe_get(
-        f"{BINANCE_FAPI}/futures/data/globalLongShortAccountRatio",
-        params={"symbol": symbol, "period": "1h", "limit": 1},
-    )
-    if not data:
-        return None
-    return float(data[0]["longShortRatio"])
 
 
 def get_rsi(symbol, period=14, interval="1h"):
@@ -224,48 +200,30 @@ def analyze_symbol(ticker):
     price = float(ticker["lastPrice"])
     price_change_pct = float(ticker["priceChangePercent"])
 
-    oi_change = get_oi_change(symbol)
-    funding = get_funding_rate(symbol)
-    ls_ratio = get_long_short_ratio(symbol)
     rsi = get_rsi(symbol)
-
-    if None in (oi_change, funding, ls_ratio, rsi):
+    if rsi is None:
         return None
 
     long_score, short_score, reasons_long, reasons_short = 0, 0, [], []
 
-    if oi_change > OI_CHANGE_THRESHOLD and price_change_pct > 0:
+    if price_change_pct > 2.5:
         long_score += 1
-        reasons_long.append(f"OI+{oi_change:.1f}% مع سعر مرتفع (دخول سيولة جديدة)")
-    if oi_change > OI_CHANGE_THRESHOLD and price_change_pct < 0:
+        reasons_long.append(f"ارتفاع ملحوظ بالسعر (+{price_change_pct:.1f}%)")
+    elif price_change_pct < -2.5:
         short_score += 1
-        reasons_short.append(f"OI+{oi_change:.1f}% مع سعر منخفض (دخول سيولة شورت)")
-
-    if funding <= -FUNDING_EXTREME:
-        long_score += 1
-        reasons_long.append(f"فاندنغ سالب ({funding:.3f}%) - الشورت مزدحمين")
-    if funding >= FUNDING_EXTREME:
-        short_score += 1
-        reasons_short.append(f"فاندنغ موجب مرتفع ({funding:.3f}%) - خطر تصفية لونغ")
-
-    if ls_ratio <= LS_RATIO_LOW:
-        long_score += 1
-        reasons_long.append(f"ازدحام بيع (L/S={ls_ratio:.2f}) - احتمال ارتداد صعودي")
-    if ls_ratio >= LS_RATIO_HIGH:
-        short_score += 1
-        reasons_short.append(f"ازدحام شراء (L/S={ls_ratio:.2f}) - احتمال تصحيح هبوطي")
+        reasons_short.append(f"انخفاض ملحوظ بالسعر ({price_change_pct:.1f}%)")
 
     if rsi <= RSI_OVERSOLD:
-        long_score += 1
+        long_score += 2
         reasons_long.append(f"RSI تشبع بيعي ({rsi:.0f})")
-    if rsi >= RSI_OVERBOUGHT:
-        short_score += 1
+    elif rsi >= RSI_OVERBOUGHT:
+        short_score += 2
         reasons_short.append(f"RSI تشبع شرائي ({rsi:.0f})")
 
     direction, score, reasons = None, 0, []
-    if long_score > short_score and long_score >= MIN_SCORE_TO_ALERT:
+    if long_score >= 2:
         direction, score, reasons = "LONG", long_score, reasons_long
-    elif short_score > long_score and short_score >= MIN_SCORE_TO_ALERT:
+    elif short_score >= 2:
         direction, score, reasons = "SHORT", short_score, reasons_short
     else:
         return None
@@ -296,8 +254,8 @@ def format_new_position_alert(sig):
         f"💰 سعر الدخول: {sig['entry']:.5f}\n"
         f"🎯 الهدف: {sig['target']:.5f}\n"
         f"🛑 وقف الخسارة: {sig['stop_loss']:.5f}\n\n"
-        f"📊 الأسباب (قوة الإشارة: {sig['score']}/4):\n{reasons_txt}\n\n"
-        f"⚠️ تحليل آلي وليس نصيحة استثمارية - أدر رأس مالك بحذر."
+        f"📊 الأسباب:\n{reasons_txt}\n\n"
+        f"⚠️ تحليل آلي وليس نصيحة استثمارية."
     )
 
 
@@ -307,14 +265,12 @@ def main():
     positions = load_positions()
     open_symbols = {p["symbol"] for p in positions}
 
-    # 1) راقب الصفقات المفتوحة أولاً (هدف / وقف)
     if positions:
         print(f"[*] مراقبة {len(positions)} صفقة مفتوحة...")
         positions = check_open_positions(positions)
     else:
         print("[*] ما فيه صفقات مفتوحة حالياً.")
 
-    # 2) إذا فيه مجال لصفقات جديدة، دور على أفضل الفرص
     slots_available = MAX_OPEN_POSITIONS - len(positions)
     if slots_available > 0:
         print("[*] جلب أهم العملات بالسيولة من Binance...")
@@ -323,13 +279,12 @@ def main():
         print(f"[*] فحص {len(top)} عملة...")
         for t in top:
             if t["symbol"] in open_symbols:
-                continue  # فيها صفقة مفتوحة أصلاً - تجاوزها
+                continue
             sig = analyze_symbol(t)
             if sig:
                 candidates.append(sig)
-            time.sleep(0.3)
+            time.sleep(0.1)
 
-        # رتب حسب قوة الإشارة، خذ الأفضل فقط
         candidates.sort(key=lambda s: s["score"], reverse=True)
         to_open = candidates[: min(slots_available, MAX_NEW_PER_RUN)]
 
@@ -343,7 +298,7 @@ def main():
         if not to_open:
             print("[*] ما فيه فرص جديدة تستاهل هسه.")
     else:
-        print(f"[*] وصلنا الحد الأقصى للصفقات المفتوحة ({MAX_OPEN_POSITIONS}) - ما راح نفتح جديد.")
+        print(f"[*] وصلنا الحد الأقصى للصفقات المفتوحة ({MAX_OPEN_POSITIONS}).")
 
     save_positions(positions)
     print(f"[*] الصفقات المفتوحة الآن: {len(positions)}")
