@@ -1,0 +1,38 @@
+name: Crypto Signal Bot
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # كل 10 دقائق (فحص + مراقبة الصفقات المفتوحة)
+  workflow_dispatch: {}       # يسمح بالتشغيل اليدوي من تبويب Actions
+
+permissions:
+  contents: write             # يحتاجها البوت عشان يحفظ positions.json بالريبو
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run signal bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python signal_bot.py
+
+      - name: Save positions state
+        run: |
+          git config user.name "signal-bot"
+          git config user.email "signal-bot@users.noreply.github.com"
+          git add positions.json
+          git diff --staged --quiet || git commit -m "update open positions [skip ci]"
+          git push || echo "nothing to push"
