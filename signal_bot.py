@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Crypto Signal Bot - Fast & Reliable
+Crypto Signal Bot - Fast & Reliable (MEXC API)
 ======================================================================
 """
 
@@ -12,7 +12,6 @@ from datetime import datetime, timezone
 
 import requests
 
-# استخدام API منصة MEXC لأنها لا تحظر عناوين GitHub Actions
 MEXC_API = "https://api.mexc.com"
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -23,8 +22,6 @@ RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
 MAX_OPEN_POSITIONS = 5
 MAX_NEW_PER_RUN = 3
-STOP_PCT = 2.0
-TARGET_PCT = 4.0
 
 SESSION = requests.Session()
 SESSION.headers.update({
@@ -38,7 +35,7 @@ def safe_get(url, params=None, retries=2):
             r = SESSION.get(url, params=params, timeout=10)
             r.raise_for_status()
             return r.json()
-        except Exception as e:
+        except Exception:
             time.sleep(1)
     return None
 
@@ -98,10 +95,10 @@ def check_open_positions(positions):
 
         if hit_target:
             pnl_pct = ((price - pos["entry"]) / pos["entry"] * 100) if pos["direction"] == "LONG" else ((pos["entry"] - price) / pos["entry"] * 100)
-            send_telegram(f"✅ <b>تحقق الهدف!</b> {pos['symbol']}\nالربح: +{pnl_pct:.2f}%")
+            send_telegram(f"✅ <b>تحقق الهدف الأول!</b> {pos['symbol']}\nالربح: +{pnl_pct:.2f}%")
         elif hit_stop:
             pnl_pct = ((price - pos["entry"]) / pos["entry"] * 100) if pos["direction"] == "LONG" else ((pos["entry"] - price) / pos["entry"] * 100)
-            send_telegram(f"❌ <b>ضرب وقف الخسارة</b> {pos['symbol']}\nالخسارة: {pnl_pct:.2f}%")
+            send_telegram(f"🛑 <b>ضرب وقف الخسارة</b> {pos['symbol']}\nالخسارة: {pnl_pct:.2f}%")
         else:
             still_open.append(pos)
         time.sleep(0.1)
@@ -144,32 +141,61 @@ def analyze_symbol(ticker):
     if rsi is None:
         return None
 
-    direction, reasons = None, []
+    direction = None
     if rsi <= RSI_OVERSOLD and price_change > -5:
         direction = "LONG"
-        reasons.append(f"RSI تشبع بيعي ({rsi:.0f})")
     elif rsi >= RSI_OVERBOUGHT and price_change < 5:
         direction = "SHORT"
-        reasons.append(f"RSI تشبع شرائي ({rsi:.0f})")
     else:
         return None
 
-    if direction == "LONG":
-        stop_loss = price * (1 - STOP_PCT / 100)
-        target = price * (1 + TARGET_PCT / 100)
-    else:
-        stop_loss = price * (1 + STOP_PCT / 100)
-        target = price * (1 - TARGET_PCT / 100)
+    # حساب النطاقات والأهداف مثل شكل الصورة تماماً
+    formatted_symbol = symbol.replace("USDT", "|USDT")
+    buy_low = price * 0.985
+    buy_high = price * 1.005
+    
+    t1 = price * 1.02
+    t2 = price * 1.04
+    t3 = price * 1.07
+    t4 = price * 1.12
+    t5 = price * 1.20
+    stop = price * 0.95
 
     return {
         "symbol": symbol,
+        "formatted_symbol": formatted_symbol,
         "direction": direction,
         "score": 2,
-        "reasons": reasons,
         "entry": price,
-        "stop_loss": stop_loss,
-        "target": target,
+        "buy_range": f"{buy_low:.2f} - {buy_high:.2f}" if price > 1 else f"{buy_low:.4f} - {buy_high:.4f}",
+        "t1": f"{t1:.2f}" if price > 1 else f"{t1:.4f}",
+        "t2": f"{t2:.2f}" if price > 1 else f"{t2:.4f}",
+        "t3": f"{t3:.2f}" if price > 1 else f"{t3:.4f}",
+        "t4": f"{t4:.2f}" if price > 1 else f"{t4:.4f}",
+        "t5": f"{t5:.2f}" if price > 1 else f"{t5:.4f}",
+        "stop": f"{stop:.2f}" if price > 1 else f"{stop:.4f}",
+        "target": t1,
+        "stop_loss": stop
     }
+
+
+def format_custom_telegram_msg(sig):
+    """دالة تنسيق الرسالة لتكون مطابقة للصورة تماماً"""
+    action_type = "Buy" if sig["direction"] == "LONG" else "Sell"
+    
+    msg = (
+        f"🌹 <b>ربح التراكمي Scalp~سبوت</b> 🌹\n"
+        f"❇️<b>{sig['formatted_symbol']}</b>\n\n"
+        f"🔱 {action_type}: {sig['buy_range']}\n\n"
+        f"T:🎯\n\n"
+        f"T1: {sig['t1']}\n"
+        f"T2: {sig['t2']}\n"
+        f"T3: {sig['t3']}\n"
+        f"T4: {sig['t4']}\n"
+        f"T5: {sig['t5']}\n\n"
+        f"🔴Stop: {sig['stop']} اغلاق 4ساعات اقل من"
+    )
+    return msg
 
 
 def main():
@@ -199,7 +225,10 @@ def main():
         for sig in to_open:
             sig["opened_at"] = now_iso()
             positions.append(sig)
-            msg = f"🟢 <b>صفقة جديدة: {sig['direction']}</b> - {sig['symbol']}\nدخول: {sig['entry']}\nهدف: {sig['target']:.4f}\nوقف: {sig['stop_loss']:.4f}"
+            
+            # إرسال التنسيق الجديد
+            msg = format_custom_telegram_msg(sig)
+            print("--- إرسال رسالة بتنسيق الصورة ---")
             print(msg)
             send_telegram(msg)
 
