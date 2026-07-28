@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 
 import requests
 
-BINANCE_FAPI = "https://fapi.binance.com"
+BINANCE_FAPI = "https://data-api.binance.vision"
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 POSITIONS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "positions.json")
