@@ -51,23 +51,6 @@
     "opened_at": "2026-07-29T16:25:10.976348+00:00"
   },
   {
-    "symbol": "FILUSDT",
-    "formatted_symbol": "FIL|USDT",
-    "direction": "LONG",
-    "score": 2,
-    "entry": 0.6638,
-    "buy_range": "0.6538 - 0.6671",
-    "t1": "0.6771",
-    "t2": "0.6904",
-    "t3": "0.7103",
-    "t4": "0.7435",
-    "t5": "0.7966",
-    "stop": "0.6306",
-    "target": 0.677076,
-    "stop_loss": 0.6306099999999999,
-    "opened_at": "2026-07-29T20:14:57.801283+00:00"
-  },
-  {
     "symbol": "DOGEUSDT",
     "formatted_symbol": "DOGE|USDT",
     "direction": "LONG",
