@@ -46,23 +46,6 @@
     "opened_at": "2026-07-29T16:25:10.432650+00:00"
   },
   {
-    "symbol": "TRXUSDT",
-    "formatted_symbol": "TRX|USDT",
-    "direction": "SHORT",
-    "score": 2,
-    "entry": 0.3267,
-    "buy_range": "0.3218 - 0.3283",
-    "t1": "0.3332",
-    "t2": "0.3398",
-    "t3": "0.3496",
-    "t4": "0.3659",
-    "t5": "0.3920",
-    "stop": "0.3104",
-    "target": 0.333234,
-    "stop_loss": 0.310365,
-    "opened_at": "2026-07-29T16:25:10.716134+00:00"
-  },
-  {
     "symbol": "GRAMUSDT",
     "formatted_symbol": "GRAM|USDT",
     "direction": "LONG",
