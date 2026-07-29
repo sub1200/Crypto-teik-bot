@@ -27,5 +27,39 @@
     "target": 46.053,
     "stop_loss": 42.8925,
     "opened_at": "2026-07-29T07:30:01.709658+00:00"
+  },
+  {
+    "symbol": "XMRUSDT",
+    "formatted_symbol": "XMR|USDT",
+    "direction": "SHORT",
+    "score": 2,
+    "entry": 352.83,
+    "buy_range": "347.54 - 354.59",
+    "t1": "359.89",
+    "t2": "366.94",
+    "t3": "377.53",
+    "t4": "395.17",
+    "t5": "423.40",
+    "stop": "335.19",
+    "target": 359.8866,
+    "stop_loss": 335.1885,
+    "opened_at": "2026-07-29T14:52:20.351956+00:00"
+  },
+  {
+    "symbol": "AETUSDT",
+    "formatted_symbol": "AET|USDT",
+    "direction": "LONG",
+    "score": 2,
+    "entry": 1.4533,
+    "buy_range": "1.43 - 1.46",
+    "t1": "1.48",
+    "t2": "1.51",
+    "t3": "1.56",
+    "t4": "1.63",
+    "t5": "1.74",
+    "stop": "1.38",
+    "target": 1.482366,
+    "stop_loss": 1.380635,
+    "opened_at": "2026-07-29T14:52:20.913433+00:00"
   }
 ]
