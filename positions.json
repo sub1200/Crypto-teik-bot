@@ -51,23 +51,6 @@
     "opened_at": "2026-07-30T17:05:03.228347+00:00"
   },
   {
-    "symbol": "BNBUSDT",
-    "formatted_symbol": "BNB|USDT",
-    "direction": "SHORT",
-    "score": 2,
-    "entry": 592.68,
-    "buy_range": "583.79 - 595.64",
-    "t1": "604.53",
-    "t2": "616.39",
-    "t3": "634.17",
-    "t4": "663.80",
-    "t5": "711.22",
-    "stop": "563.05",
-    "target": 604.5336,
-    "stop_loss": 563.0459999999999,
-    "opened_at": "2026-07-30T23:45:40.231000+00:00"
-  },
-  {
     "symbol": "RAINUSDT",
     "formatted_symbol": "RAIN|USDT",
     "direction": "LONG",
@@ -83,5 +66,22 @@
     "target": 0.013628322000000002,
     "stop_loss": 0.012693045,
     "opened_at": "2026-07-30T23:45:40.361758+00:00"
+  },
+  {
+    "symbol": "HYPEUSDT",
+    "formatted_symbol": "HYPE|USDT",
+    "direction": "SHORT",
+    "score": 2,
+    "entry": 55.83,
+    "buy_range": "54.99 - 56.11",
+    "t1": "56.95",
+    "t2": "58.06",
+    "t3": "59.74",
+    "t4": "62.53",
+    "t5": "67.00",
+    "stop": "53.04",
+    "target": 56.9466,
+    "stop_loss": 53.0385,
+    "opened_at": "2026-07-31T01:18:11.642494+00:00"
   }
 ]
