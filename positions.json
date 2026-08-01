@@ -34,23 +34,6 @@
     "opened_at": "2026-07-30T17:05:03.228347+00:00"
   },
   {
-    "symbol": "RAINUSDT",
-    "formatted_symbol": "RAIN|USDT",
-    "direction": "LONG",
-    "score": 2,
-    "entry": 0.0133611,
-    "buy_range": "0.0132 - 0.0134",
-    "t1": "0.0136",
-    "t2": "0.0139",
-    "t3": "0.0143",
-    "t4": "0.0150",
-    "t5": "0.0160",
-    "stop": "0.0127",
-    "target": 0.013628322000000002,
-    "stop_loss": 0.012693045,
-    "opened_at": "2026-07-30T23:45:40.361758+00:00"
-  },
-  {
     "symbol": "WXTUSDT",
     "formatted_symbol": "WXT|USDT",
     "direction": "LONG",
@@ -83,5 +66,22 @@
     "target": 65211.5784,
     "stop_loss": 60736.274,
     "opened_at": "2026-07-31T07:44:37.920037+00:00"
+  },
+  {
+    "symbol": "USDGOUSDT",
+    "formatted_symbol": "USDGO|USDT",
+    "direction": "LONG",
+    "score": 2,
+    "entry": 1.001,
+    "buy_range": "0.99 - 1.01",
+    "t1": "1.02",
+    "t2": "1.04",
+    "t3": "1.07",
+    "t4": "1.12",
+    "t5": "1.20",
+    "stop": "0.95",
+    "target": 1.0210199999999998,
+    "stop_loss": 0.9509499999999999,
+    "opened_at": "2026-08-01T04:42:13.777920+00:00"
   }
 ]
