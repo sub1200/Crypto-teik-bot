@@ -34,23 +34,6 @@
     "opened_at": "2026-07-30T17:05:03.228347+00:00"
   },
   {
-    "symbol": "WXTUSDT",
-    "formatted_symbol": "WXT|USDT",
-    "direction": "LONG",
-    "score": 2,
-    "entry": 0.015279,
-    "buy_range": "0.0150 - 0.0154",
-    "t1": "0.0156",
-    "t2": "0.0159",
-    "t3": "0.0163",
-    "t4": "0.0171",
-    "t5": "0.0183",
-    "stop": "0.0145",
-    "target": 0.015584579999999999,
-    "stop_loss": 0.014515049999999998,
-    "opened_at": "2026-07-31T04:49:39.904337+00:00"
-  },
-  {
     "symbol": "USDGOUSDT",
     "formatted_symbol": "USDGO|USDT",
     "direction": "LONG",
@@ -83,5 +66,22 @@
     "target": 66189.432,
     "stop_loss": 61647.02,
     "opened_at": "2026-08-08T02:19:23.846917+00:00"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "formatted_symbol": "ETH|USDT",
+    "direction": "SHORT",
+    "score": 2,
+    "entry": 1924.14,
+    "buy_range": "1895.28 - 1933.76",
+    "t1": "1962.62",
+    "t2": "2001.11",
+    "t3": "2058.83",
+    "t4": "2155.04",
+    "t5": "2308.97",
+    "stop": "1827.93",
+    "target": 1962.6228,
+    "stop_loss": 1827.933,
+    "opened_at": "2026-08-08T15:16:43.071604+00:00"
   }
 ]
