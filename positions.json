@@ -1,22 +1,5 @@
 [
   {
-    "symbol": "LTCUSDT",
-    "formatted_symbol": "LTC|USDT",
-    "direction": "LONG",
-    "score": 2,
-    "entry": 45.15,
-    "buy_range": "44.47 - 45.38",
-    "t1": "46.05",
-    "t2": "46.96",
-    "t3": "48.31",
-    "t4": "50.57",
-    "t5": "54.18",
-    "stop": "42.89",
-    "target": 46.053,
-    "stop_loss": 42.8925,
-    "opened_at": "2026-07-29T07:30:01.709658+00:00"
-  },
-  {
     "symbol": "USDCUSDT",
     "formatted_symbol": "USDC|USDT",
     "direction": "LONG",
@@ -68,20 +51,37 @@
     "opened_at": "2026-08-08T02:19:23.846917+00:00"
   },
   {
-    "symbol": "BNBUSDT",
-    "formatted_symbol": "BNB|USDT",
+    "symbol": "SOLUSDT",
+    "formatted_symbol": "SOL|USDT",
     "direction": "SHORT",
     "score": 2,
-    "entry": 602.97,
-    "buy_range": "593.93 - 605.98",
-    "t1": "615.03",
-    "t2": "627.09",
-    "t3": "645.18",
-    "t4": "675.33",
-    "t5": "723.56",
-    "stop": "572.82",
-    "target": 615.0294,
-    "stop_loss": 572.8215,
-    "opened_at": "2026-08-08T20:14:59.452521+00:00"
+    "entry": 76.19,
+    "buy_range": "75.05 - 76.57",
+    "t1": "77.71",
+    "t2": "79.24",
+    "t3": "81.52",
+    "t4": "85.33",
+    "t5": "91.43",
+    "stop": "72.38",
+    "target": 77.71379999999999,
+    "stop_loss": 72.3805,
+    "opened_at": "2026-08-08T20:52:36.570698+00:00"
+  },
+  {
+    "symbol": "WXTUSDT",
+    "formatted_symbol": "WXT|USDT",
+    "direction": "SHORT",
+    "score": 2,
+    "entry": 0.015548,
+    "buy_range": "0.0153 - 0.0156",
+    "t1": "0.0159",
+    "t2": "0.0162",
+    "t3": "0.0166",
+    "t4": "0.0174",
+    "t5": "0.0187",
+    "stop": "0.0148",
+    "target": 0.01585896,
+    "stop_loss": 0.014770599999999998,
+    "opened_at": "2026-08-08T20:52:36.755494+00:00"
   }
 ]
