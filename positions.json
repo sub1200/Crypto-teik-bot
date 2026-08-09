@@ -68,20 +68,20 @@
     "opened_at": "2026-08-08T22:44:56.078539+00:00"
   },
   {
-    "symbol": "BNBUSDT",
-    "formatted_symbol": "BNB|USDT",
-    "direction": "SHORT",
+    "symbol": "ANTFUNUSDT",
+    "formatted_symbol": "ANTFUN|USDT",
+    "direction": "LONG",
     "score": 2,
-    "entry": 602.6,
-    "buy_range": "593.56 - 605.61",
-    "t1": "614.65",
-    "t2": "626.70",
-    "t3": "644.78",
-    "t4": "674.91",
-    "t5": "723.12",
-    "stop": "572.47",
-    "target": 614.652,
-    "stop_loss": 572.47,
-    "opened_at": "2026-08-09T00:40:23.012911+00:00"
+    "entry": 0.042731,
+    "buy_range": "0.0421 - 0.0429",
+    "t1": "0.0436",
+    "t2": "0.0444",
+    "t3": "0.0457",
+    "t4": "0.0479",
+    "t5": "0.0513",
+    "stop": "0.0406",
+    "target": 0.04358562,
+    "stop_loss": 0.04059445,
+    "opened_at": "2026-08-09T02:52:17.382934+00:00"
   }
 ]
