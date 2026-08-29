@@ -34,23 +34,6 @@
     "opened_at": "2026-08-01T04:42:13.777920+00:00"
   },
   {
-    "symbol": "BTCUSDT",
-    "formatted_symbol": "BTC|USDT",
-    "direction": "LONG",
-    "score": 2,
-    "entry": 64891.6,
-    "buy_range": "63918.23 - 65216.06",
-    "t1": "66189.43",
-    "t2": "67487.26",
-    "t3": "69434.01",
-    "t4": "72678.59",
-    "t5": "77869.92",
-    "stop": "61647.02",
-    "target": 66189.432,
-    "stop_loss": 61647.02,
-    "opened_at": "2026-08-08T02:19:23.846917+00:00"
-  },
-  {
     "symbol": "MBGUSDT",
     "formatted_symbol": "MBG|USDT",
     "direction": "LONG",
